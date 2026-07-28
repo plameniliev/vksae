@@ -31,7 +31,7 @@ spec:
       machineDeployments:
         - class: node-pool
           name: vks-cluster-13-np-g64z
-          replicas: 3
+          replicas: 6
           metadata:
             annotations:
               run.tanzu.vmware.com/resolve-os-image: os-name=photon, content-library=cl-bab712043ac0065d3
