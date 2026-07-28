@@ -1,7 +1,7 @@
 apiVersion: cluster.x-k8s.io/v1beta2
 kind: Cluster
 metadata:
-  name: vks-cluster-11
+  name: vks-cluster-13
   namespace: play-6t9bt
 spec:
   clusterNetwork:
@@ -30,7 +30,7 @@ spec:
     workers:
       machineDeployments:
         - class: node-pool
-          name: vks-cluster-11-np-g64z
+          name: vks-cluster-13-np-g64z
           replicas: 3
           metadata:
             annotations:
