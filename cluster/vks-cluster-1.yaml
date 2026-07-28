@@ -35,3 +35,135 @@ spec:
           metadata:
             annotations:
               run.tanzu.vmware.com/resolve-os-image: os-name=photon, content-library=cl-bab712043ac0065d3
+---
+apiVersion: addons.kubernetes.vmware.com/v1alpha1
+kind: AddonInstall
+metadata:
+  name: vks-cluster-1-fluent-bit
+spec:
+  addonRef:
+    name: fluent-bit
+  clusters:
+  - selector:
+      matchLabels:
+        cluster.x-k8s.io/cluster-name: vks-cluster-1
+---
+apiVersion: addons.kubernetes.vmware.com/v1alpha1
+kind: AddonConfig
+metadata:
+  annotations:
+    clusteraddon.addons.kubernetes.vmware.com/owned-for-deletion: "true"
+  name: vks-cluster-1-fluent-bit-wkvp9
+spec:
+  addonConfigDefinitionRef:
+    name: fluent-bit.kubernetes.vmware.com.5.0.5---vmware.1-vks.1
+    namespace: vmware-system-vks-public
+  clusterName: vks-cluster-1
+  values:
+    fluent_bit:
+      config:
+        filters: |
+          [FILTER]
+            Name                kubernetes
+            Match               kube.*
+            Kube_URL            https://kubernetes.default.svc:443
+            Kube_CA_File        /var/run/secrets/kubernetes.io/serviceaccount/ca.crt
+            Kube_Token_File     /var/run/secrets/kubernetes.io/serviceaccount/token
+            Kube_Tag_Prefix     kube.var.log.containers.
+            Merge_Log           On
+            Merge_Log_Key       log_processed
+            K8S-Logging.Parser  On
+            K8S-Logging.Exclude On
+          # 1. Ensure "text" and "originalText" exist at root
+          [FILTER]
+              Name                modify
+              Match               *
+              Copy                log text
+              Copy                log originalText
+              Set                 cluster vks-cluster-1
+              Set                 log_type app
+              Set                 piliev piliev
+          [FILTER]
+            Name                  modify
+            Match                 kube.*
+            Add                   text "K8s Container Logs"
+            Copy                  kubernetes k8s
+          [FILTER]
+            Name                  nest
+            Match                 kube.*
+            Operation             lift
+            Nested_Under          kubernetes
+          [FILTER]
+            Name                  modify
+            Match                 kube.*
+            Add                   text "K8s Container logs"
+          [FILTER]
+            Name                  modify
+            Match                 kube_systemd.*
+            Add                   text "Linux Daemon Logs"
+          [FILTER]
+            Name                  modify
+            Match                 auth.*
+            Add                   text "Linux Auth Logs"
+          [FILTER]
+            Name                  modify
+            Match                 apiserver_audit.*
+            Add                   text "Kubernetes API Server Audit Logs"
+        inputs: |
+          [INPUT]
+            Name              tail
+            Tag               kube.*
+            Path              /var/log/containers/*.log
+            Parser            cri
+            DB                /var/log/flb_kube.db
+            Mem_Buf_Limit     5MB
+            Skip_Long_Lines   On
+            Refresh_Interval  10
+          [INPUT]
+            Name                systemd
+            Tag                 kube_systemd.*
+            Path                /var/log/journal
+            DB                  /var/log/flb_kube_systemd.db
+            Systemd_Filter      _SYSTEMD_UNIT=kubelet.service
+            Systemd_Filter      _SYSTEMD_UNIT=containerd.service
+            Read_From_Tail      On
+            Strip_Underscores   On
+          [INPUT]
+            Name              tail
+            Tag               apiserver_audit.*
+            Parser            json
+            Path              /var/log/kubernetes/kube-apiserver.log
+            DB                /var/log/flb_kube_audit.db
+            Mem_Buf_Limit     50MB
+            Refresh_Interval  10
+            Skip_Long_Lines   On
+          [INPUT]
+            Name              tail
+            Tag               auth.*
+            Path              /var/log/audit/auth.log
+            Parser            authlog
+            DB                /var/log/flb_system_auth.db
+            Mem_Buf_Limit     50MB
+            Refresh_Interval  10
+            Skip_Long_Lines   On
+          [INPUT]
+              Name              tail
+              Tag               kube.*
+              Path              /var/log/containers/*.log
+              Exclude_Path      /var/log/containers/fluent-bit-*.log
+              Parser            cri
+              DB                /var/log/flb_kube.db
+              Mem_Buf_Limit     5MB
+              Skip_Long_Lines   On
+              Refresh_Interval  10
+        outputs: |
+          [OUTPUT]
+            Name          http
+            Match         *
+            Host          vcflogs.mgmt.vks.lab
+            Port          9543
+            URI           api/v2/events
+            Format        json
+            tls.debug     4
+            tls           on
+            tls.verify    off
