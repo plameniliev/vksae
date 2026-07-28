@@ -30,7 +30,7 @@ spec:
     workers:
       machineDeployments:
         - class: node-pool
-          name: vks-cluster-11-np-g64y
+          name: vks-cluster-11-np-g64z
           replicas: 3
           metadata:
             annotations:
