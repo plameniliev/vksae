@@ -23,7 +23,7 @@ spec:
       - name: storageClass
         value: wkld01-cluster01-optimal-datastore-default-policy-autoraid
     controlPlane:
-      replicas: 1
+      replicas: 3
       metadata:
         annotations:
           run.tanzu.vmware.com/resolve-os-image: os-name=photon, content-library=cl-bab712043ac0065d3
@@ -31,7 +31,7 @@ spec:
       machineDeployments:
         - class: node-pool
           name: vks-cluster-11-np-g64y
-          replicas: 3
+          replicas: 6
           metadata:
             annotations:
               run.tanzu.vmware.com/resolve-os-image: os-name=photon, content-library=cl-bab712043ac0065d3
