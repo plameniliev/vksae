@@ -80,7 +80,7 @@ spec:
               Match               *
               Copy                log text
               Copy                log originalText
-              Set                 cluster vks-cluster-1
+              Set                 cluster vks-cluster-2
               Set                 log_type app
               Set                 piliev piliev
           [FILTER]
