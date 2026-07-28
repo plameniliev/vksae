@@ -53,7 +53,7 @@ kind: AddonConfig
 metadata:
   annotations:
     clusteraddon.addons.kubernetes.vmware.com/owned-for-deletion: "true"
-  name: vks-cluster-1-fluent-bit-wkvp9
+  name: vks-cluster-1-fluent-bit
 spec:
   addonConfigDefinitionRef:
     name: fluent-bit.kubernetes.vmware.com.5.0.5---vmware.1-vks.1
