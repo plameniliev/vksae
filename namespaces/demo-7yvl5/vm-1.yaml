@@ -1,0 +1,12 @@
+apiVersion: vmoperator.vmware.com/v1alpha5
+kind: VirtualMachine
+metadata:
+  name: vm-1
+  namespace: demo-7yvl5
+  labels:
+    vm-selector: vm-1
+spec:
+  className: best-effort-xsmall
+  imageName: vmi-f5a11c32638ff04fc
+  storageClass: mgmt-01-cluster-01-optimal-datastore-default-policy-autoraid
+  powerState: PoweredOn

@@ -1,8 +1,8 @@
 apiVersion: cluster.x-k8s.io/v1beta2
 kind: Cluster
 metadata:
-  name: vks-cluster-12
-  namespace: play-6t9bt
+  name: 'vks-cluster-1'
+  namespace: 'play-6t9bt'
 spec:
   clusterNetwork:
     pods:
@@ -16,12 +16,18 @@ spec:
     classRef:
       name: builtin-generic-v3.7.0
       namespace: vmware-system-vks-public
-    version: v1.36.1---vmware.4-vkr.5
+    version: 'v1.36.1---vmware.4-vkr.5'
     variables:
       - name: vmClass
         value: best-effort-large
       - name: storageClass
-        value: wkld01-cluster01-optimal-datastore-default-policy-autoraid
+        value: vsan-default-storage-policy
+      - name: volumes
+        value:
+          - name: vol-jjrh-20
+            mountPath: /var/lib/containerd
+            storageClass: vsan-default-storage-policy
+            capacity: 20Gi
     controlPlane:
       replicas: 3
       metadata:
@@ -30,7 +36,7 @@ spec:
     workers:
       machineDeployments:
         - class: node-pool
-          name: vks-cluster-12-np-g64y
+          name: 'vks-cluster-1-np-3fp5'
           replicas: 3
           metadata:
             annotations:

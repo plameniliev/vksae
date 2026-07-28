@@ -1,0 +1,43 @@
+apiVersion: cluster.x-k8s.io/v1beta2
+kind: Cluster
+metadata:
+  name: 'vks-cluster-99'
+  namespace: 'demo-7yvl5'
+spec:
+  clusterNetwork:
+    pods:
+      cidrBlocks:
+        - 192.168.156.0/20
+    services:
+      cidrBlocks:
+        - 10.96.0.0/12
+    serviceDomain: cluster.local
+  topology:
+    classRef:
+      name: builtin-generic-v3.6.0
+      namespace: vmware-system-vks-public
+    version: 'v1.34.8---vmware.1-vkr.1'
+    variables:
+      - name: vmClass
+        value: best-effort-large
+      - name: storageClass
+        value: mgmt-01-cluster-01-optimal-datastore-default-policy-autoraid
+      - name: volumes
+        value:
+          - name: vol-jjrh-20
+            mountPath: /var/lib/containerd
+            storageClass: mgmt-01-cluster-01-optimal-datastore-default-policy-autoraid
+            capacity: 50Gi
+    controlPlane:
+      replicas: 1
+      metadata:
+        annotations:
+          run.tanzu.vmware.com/resolve-os-image: os-name=photon, content-library=cl-368c21b17d0ceedf4
+    workers:
+      machineDeployments:
+        - class: node-pool
+          name: 'vks-cluster-99-np-3fp5'
+          replicas: 3
+          metadata:
+            annotations:
+              run.tanzu.vmware.com/resolve-os-image: os-name=photon, content-library=cl-368c21b17d0ceedf4

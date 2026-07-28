@@ -1,0 +1,5 @@
+name: vks-cluster-x
+namespaces: demo-xyz
+controlPlaneReplicas: 1
+nodePoolReplicas: 3
+vksVersion: v1.35.5---vmware.1-vkr.1

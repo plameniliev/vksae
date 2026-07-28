@@ -1,0 +1,11 @@
+apiVersion: addons.kubernetes.vmware.com/v1alpha1
+kind: AddonInstall
+metadata:
+  name: '{{ .Values.name }}-fluent-bit'
+spec:
+  addonRef:
+    name: fluent-bit
+  clusters:
+  - selector:
+      matchLabels:
+        cluster.x-k8s.io/cluster-name: '{{ .Values.name }}'

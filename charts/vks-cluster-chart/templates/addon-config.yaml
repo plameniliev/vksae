@@ -1,0 +1,72 @@
+apiVersion: addons.kubernetes.vmware.com/v1alpha1
+kind: AddonConfig
+metadata:
+  annotations:
+    clusteraddon.addons.kubernetes.vmware.com/owned-for-deletion: "true"
+  name: '{{ .Values.name }}-fluent-bit'
+spec:
+  addonConfigDefinitionRef:
+    name: fluent-bit.kubernetes.vmware.com.5.0.5---vmware.1-vks.1
+    namespace: vmware-system-vks-public
+  clusterName: '{{ .Values.name }}'
+  values:
+    fluent_bit:
+      config:
+        filters: |
+          [FILTER]
+            Name                kubernetes
+            Match               kube.*
+            Kube_URL            https://kubernetes.default.svc:443
+            Kube_CA_File        /var/run/secrets/kubernetes.io/serviceaccount/ca.crt
+            Kube_Token_File     /var/run/secrets/kubernetes.io/serviceaccount/token
+            Kube_Tag_Prefix     kube.var.log.containers.
+            Merge_Log           On
+            Merge_Log_Key       log_processed
+            K8S-Logging.Parser  On
+            K8S-Logging.Exclude On
+          # 1. Ensure "text" and "originalText" exist at root
+          [FILTER]
+              Name                modify
+              Match               *
+              Copy                log text
+              Copy                log originalText
+              Set                 cluster {{ .Values.name }}
+              Set                 log_type app
+              Set                 vks true
+          [FILTER]
+            Name                  modify
+            Match                 kube.*
+            Add                   text "K8s Container Logs"
+            Copy                  kubernetes k8s
+          [FILTER]
+            Name                  nest
+            Match                 kube.*
+            Operation             lift
+            Nested_Under          kubernetes
+          [FILTER]
+            Name                  modify
+            Match                 kube.*
+            Add                   text "K8s Container logs"
+          [FILTER]
+            Name                  modify
+            Match                 kube_systemd.*
+            Add                   text "Linux Daemon Logs"
+          [FILTER]
+            Name                  modify
+            Match                 auth.*
+            Add                   text "Linux Auth Logs"
+          [FILTER]
+            Name                  modify
+            Match                 apiserver_audit.*
+            Add                   text "Kubernetes API Server Audit Logs"
+        outputs: |
+          [OUTPUT]
+            Name          http
+            Match         *
+            Host          vcflogs.mgmt.vks.lab
+            Port          9543
+            URI           api/v2/events
+            Format        json
+            tls.debug     4
+            tls           on
+            tls.verify    off
