@@ -1,7 +1,7 @@
 apiVersion: cluster.x-k8s.io/v1beta2
 kind: Cluster
 metadata:
-  name: vks-cluster-2
+  name: vks-cluster-12
   namespace: play-6t9bt
 spec:
   clusterNetwork:
@@ -19,7 +19,7 @@ spec:
     version: v1.36.1---vmware.4-vkr.5
     variables:
       - name: vmClass
-        value: best-effort-medium
+        value: best-effort-large
       - name: storageClass
         value: wkld01-cluster01-optimal-datastore-default-policy-autoraid
     controlPlane:
@@ -30,7 +30,7 @@ spec:
     workers:
       machineDeployments:
         - class: node-pool
-          name: vks-cluster-2-np-g64q
+          name: vks-cluster-12-np-g64q
           replicas: 1
           metadata:
             annotations:
@@ -39,26 +39,26 @@ spec:
 apiVersion: addons.kubernetes.vmware.com/v1alpha1
 kind: AddonInstall
 metadata:
-  name: vks-cluster-2-fluent-bit
+  name: vks-cluster-12-fluent-bit
 spec:
   addonRef:
     name: fluent-bit
   clusters:
   - selector:
       matchLabels:
-        cluster.x-k8s.io/cluster-name: vks-cluster-2
+        cluster.x-k8s.io/cluster-name: vks-cluster-12
 ---
 apiVersion: addons.kubernetes.vmware.com/v1alpha1
 kind: AddonConfig
 metadata:
   annotations:
     clusteraddon.addons.kubernetes.vmware.com/owned-for-deletion: "true"
-  name: vks-cluster-2-fluent-bit
+  name: vks-cluster-12-fluent-bit
 spec:
   addonConfigDefinitionRef:
     name: fluent-bit.kubernetes.vmware.com.5.0.5---vmware.1-vks.1
     namespace: vmware-system-vks-public
-  clusterName: vks-cluster-2
+  clusterName: vks-cluster-12
   values:
     fluent_bit:
       config:
@@ -80,7 +80,7 @@ spec:
               Match               *
               Copy                log text
               Copy                log originalText
-              Set                 cluster vks-cluster-2
+              Set                 cluster vks-cluster-12
               Set                 log_type app
               Set                 piliev piliev
           [FILTER]
@@ -109,53 +109,6 @@ spec:
             Name                  modify
             Match                 apiserver_audit.*
             Add                   text "Kubernetes API Server Audit Logs"
-        inputs: |
-          [INPUT]
-            Name              tail
-            Tag               kube.*
-            Path              /var/log/containers/*.log
-            Parser            cri
-            DB                /var/log/flb_kube.db
-            Mem_Buf_Limit     5MB
-            Skip_Long_Lines   On
-            Refresh_Interval  10
-          [INPUT]
-            Name                systemd
-            Tag                 kube_systemd.*
-            Path                /var/log/journal
-            DB                  /var/log/flb_kube_systemd.db
-            Systemd_Filter      _SYSTEMD_UNIT=kubelet.service
-            Systemd_Filter      _SYSTEMD_UNIT=containerd.service
-            Read_From_Tail      On
-            Strip_Underscores   On
-          [INPUT]
-            Name              tail
-            Tag               apiserver_audit.*
-            Parser            json
-            Path              /var/log/kubernetes/kube-apiserver.log
-            DB                /var/log/flb_kube_audit.db
-            Mem_Buf_Limit     50MB
-            Refresh_Interval  10
-            Skip_Long_Lines   On
-          [INPUT]
-            Name              tail
-            Tag               auth.*
-            Path              /var/log/audit/auth.log
-            Parser            authlog
-            DB                /var/log/flb_system_auth.db
-            Mem_Buf_Limit     50MB
-            Refresh_Interval  10
-            Skip_Long_Lines   On
-          [INPUT]
-              Name              tail
-              Tag               kube.*
-              Path              /var/log/containers/*.log
-              Exclude_Path      /var/log/containers/fluent-bit-*.log
-              Parser            cri
-              DB                /var/log/flb_kube.db
-              Mem_Buf_Limit     5MB
-              Skip_Long_Lines   On
-              Refresh_Interval  10
         outputs: |
           [OUTPUT]
             Name          http
