@@ -1,8 +1,8 @@
 apiVersion: cluster.x-k8s.io/v1beta2
 kind: Cluster
 metadata:
-  name: 'vks-cluster-1'
-  namespace: 'play-6t9bt'
+  name: 'vks-cluster-100'
+  namespace: 'play-sqhk9'
 spec:
   clusterNetwork:
     pods:
@@ -36,7 +36,7 @@ spec:
     workers:
       machineDeployments:
         - class: node-pool
-          name: 'vks-cluster-1-np-3fp5'
+          name: 'vks-cluster-100-np-3fp5'
           replicas: 3
           metadata:
             annotations:
