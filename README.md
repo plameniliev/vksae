@@ -29,11 +29,15 @@ argocd app create $VKS_CLUSTER \
 export VKS_NAMESPACE=play-6t9bt
 #export VKS_NAMESPACE=demo-7yvl5
 
+
+export DESTINATION=piliev-supervisor-mgmt
+export DESTINATION=piliev-supervisor-wkld
+
 argocd app create namespace-$VKS_NAMESPACE \
   --repo git@github.com:plameniliev/vksae.git \
   --path namespaces/$VKS_NAMESPACE \
   --revision init \
-  --dest-name piliev-supervisor-mgmt \
+  --dest-name $DESTINATION \
   --dest-namespace $VKS_NAMESPACE \
   --sync-policy automated \
   --auto-prune
