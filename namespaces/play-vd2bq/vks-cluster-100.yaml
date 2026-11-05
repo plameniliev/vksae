@@ -16,10 +16,10 @@ spec:
     classRef:
       name: builtin-generic-v3.8.0
       namespace: vmware-system-vks-public
-    version: v1.37.1---vmware.4-vkr.1
+    version: v1.37.1---vmware.4-vkr.1 # v1.36.4---vmware.2-vkr.3
     variables:
       - name: vmClass
-        value: best-effort-large
+        value: best-effort-2xlarge # best-effort-large
       - name: storageClass
         value: vsan-default-storage-policy
       - name: vsphereOptions
@@ -36,8 +36,8 @@ spec:
     workers:
       machineDeployments:
         - class: node-pool
-          name: vks-cluster-100-np-4smq
-          replicas: 3
+          name: vks-cluster-100-np-58cq
+          replicas: 1
           metadata:
             annotations:
               run.tanzu.vmware.com/resolve-os-image: os-name=photon
